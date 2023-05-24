@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import YPFile from '@/src/model/FileModel.js'
+
+import AliyunPanManager from '@/src/manager/AliyunPanManager.js'
 Vue.use(Vuex)
 
 let lifeData = {};
@@ -43,7 +44,8 @@ const store = new Vuex.Store({
 		vuex_token: lifeData.vuex_token ? lifeData.vuex_token : '',
 		// 如果vuex_version无需保存到本地永久存储，无需lifeData.vuex_version方式
 		vuex_version: '1.0.1',
-		g_curFile: new YPFile()
+		g_curFile: undefined,
+		g_alypManager: undefined
 	},
 	mutations: {
 		$uStore(state, payload) {

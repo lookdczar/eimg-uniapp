@@ -12,11 +12,19 @@ Vue.mixin(vuexStore);
 
 Vue.config.productionTip = false
 App.mpType = 'app'
+
 const app = new Vue({
 	store,
   ...App
 })
+console.log('after app')
+import * as global from '@/src/manager/global.js'
+
+import YPFileModel from '@/src/model/YPFileModel.js'
+store.state.g_curFile = new YPFileModel({file_id: 'testid'})
+Vue.prototype.$u.vuex('g_curFile.', store.state.g_curFile)
 app.$mount()
+
 // #endif
 
 // #ifdef VUE3

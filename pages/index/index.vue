@@ -1,6 +1,5 @@
 <template>
 	<view class="content">
-		
 		<view style="margin-top: var(--status-bar-height); width: 100%; height: calc(90vh - var(--status-bar-height));">
 			<vue-waterfall-easy @click="onImgClick" :imgsArr="imgsArr" @scrollReachBottom="getData"></vue-waterfall-easy>
 		</view>
@@ -10,7 +9,24 @@
 </template>
 
 <script>
+import YPFileModel from '@/src/model/YPFileModel.js'
+// import * as global from '@/src/manager/global.js'
+import * as cache from '@/src/manager/cache.js'
 	export default {
+		created() {
+			console.log('index, created')
+		},
+		computed: {
+			/**
+			 * @type {YPFileModel}
+			 */
+			curFile() {
+				return this.g_curFile
+			},
+			g_alypManager() {
+				return this.$store.state.g_alypManager
+			}
+		},
 		data() {
 			return {
 				imgsArr: [],
@@ -23,6 +39,7 @@
 		},
 		methods: {
 			modifyVuex() {
+				
 				this.$u.vuex('vuex_version', '1.0.1');
 				// 修改对象的形式，中间用"."分隔
 				this.$u.vuex('vuex_user.name', '诗圣');
@@ -35,6 +52,7 @@
       }
     },
 			getData() {
+				
 				console.log('getData');
 				let newData = [{
 						'src': 'https://img1.baidu.com/it/u=28231220,1635955213&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',

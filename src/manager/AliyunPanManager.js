@@ -1,5 +1,5 @@
 class AliyunPanManager {
-    constructor(refresh_token, access_token = null, token_refresh_callback = null, client_id = "", client_secret = "", base = 'https://openapi.aliyundrive.com', oauth_token_url = "https://api.nn.ci/alist/ali_open/token") {
+    constructor({refresh_token, access_token = null, token_refresh_callback = null, client_id = "", client_secret = "", base = 'https://openapi.aliyundrive.com', oauth_token_url = "https://api.nn.ci/alist/ali_open/token"}) {
         this.base = base;
         this.refresh_token = refresh_token;
         this.client_id = client_id;
@@ -111,7 +111,7 @@ class AliyunPanManager {
     }
 
     // 获取文件列表 DESC ASC
-    async fetch_open_file_list(limit = 200, parent_file_id, marker, order_direction = 'ASC') {
+    async fetch_open_file_list({parent_file_id, next_marker, limit = 200, order_direction = 'ASC'}) {
         const uri = '/adrive/v1.0/openFile/list';
         const method = 'POST';
         const data = {
@@ -120,8 +120,8 @@ class AliyunPanManager {
             "parent_file_id": parent_file_id,
             "order_direction": order_direction
         };
-        if (marker) {
-            data.marker = marker;
+        if (next_marker) {
+            data.marker = next_marker;
         }
 
         const response = await this.request(uri, method, data);
