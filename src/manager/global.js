@@ -6,11 +6,17 @@ const global = {
 	aly: {
 		accessToken: '',
 		refreshToken: '',
-		imgPassword: '',
+		
 	},
-	vuex_user: {
-		name: '明月'
-	}
+  setting: {
+    eimgPassword: '', // 加密图片密钥
+  },
+	num: {
+    imgPerPage: 10, // 图片视图每页显示数量
+  },
+  key: {
+    eimgSubfix: 'eimg', // 加密图片后缀
+  }
 };
 
 try {

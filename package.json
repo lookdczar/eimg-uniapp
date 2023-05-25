@@ -1,0 +1,23 @@
+{
+  "name": "eimg-uniapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lookdczar/eimg-uniapp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lookdczar/eimg-uniapp/issues"
+  },
+  "homepage": "https://github.com/lookdczar/eimg-uniapp#readme",
+  "dependencies": {
+    "js-md5": "^0.7.3"
+  }
+}

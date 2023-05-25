@@ -9,7 +9,7 @@
 					<u--input v-model="global.aly.refreshToken" border="none"></u--input>
 				</u-form-item>
 				<u-form-item label="imgPassword" prop="" borderBottom ref="imgPassword">
-					<u--input v-model="global.aly.imgPassword" border="none"></u--input>
+					<u--input v-model="global.setting.eimgPassword" border="none"></u--input>
 				</u-form-item>
 			</u--form>
 			<u-button type="primary" text="保存" customStyle="margin-top: 50px" @click="submit"></u-button>

@@ -2,6 +2,12 @@
 
 <!-- —————————————↓SCSS———————分界线————————————————————————— -->
 <style lang="scss" scoped>
+	.img-canvas-style {
+		display: block;
+            max-width: 100%;
+            width: auto;
+            height: auto;
+	}
 	::-webkit-scrollbar {
 		width: 12upx !important;
 		height: 16upx !important;
@@ -94,6 +100,22 @@
 					border: none;
 				}
 			}
+			a.img-wraper {
+				&>.drawPanel {
+					width: 100%;
+					display: block;
+					border: none;
+				}
+			}
+
+			a.img-wraper {
+				&>canvas {
+					width: 100%;
+					display: block;
+					border: none;
+				}
+			}
+			
 
 			.over {
 				position: absolute;
@@ -180,15 +202,18 @@
 <template>
 	<div class="vue-waterfall-easy-container"
 		:style="{ width: width && !isMobile ? width + 'px' : '', height: parseFloat(height) === height ? height + 'px' : height }">
-		<div class="loading ball-beat" v-show="isPreloading_c" :class="{ first: isFirstLoad }">
+		<div class="loading ball-beat" v-if="isPreloading_c" :class="{ first: isFirstLoad }">
 			<slot name="loading" :isFirstLoad="isFirstLoad"></slot>
-			<div class="dot" v-if="!hasLoadingSlot" v-for="n in loadingDotCount" :style="loadingDotStyle"></div>
+			<div v-if="!hasLoadingSlot">
+			
+			<div class="dot"  v-for="n in loadingDotCount" :key="n" :style="loadingDotStyle"></div>
+		</div>
 		</div>
 		<div class="vue-waterfall-easy-scroll" ref="scrollEl">
 			<slot name="waterfall-head"></slot>
 			<div class="vue-waterfall-easy"
 				:style="isMobile ? '' : { width: colWidth * cols + 'px', left: '50%', marginLeft: -1 * colWidth * cols / 2 + 'px' }">
-				<div class="img-box" v-for="(v, i) in imgsArr_c" :class="[cardAnimationClass, { __err__: v._error }]"
+				<div class="img-box" v-for="(v, i) in imgsArr_c" :key="i" :class="[cardAnimationClass, { __err__: v._error }]"
 					:style="{ padding: (isMobile ? mobileGap : gap) / 2 + 'px', width: isMobile ? '' : colWidth + 'px' }">
 					<component :is="isRouterLink && linkRange == 'card' ? 'router-link' : 'alink'" class="img-inner-box"
 						:data-index="i" :to="linkRange == 'card' ? v[hrefKey] : false">
@@ -196,7 +221,10 @@
 							:is="isRouterLink && linkRange == 'img' ? 'router-link' : 'alink'"
 							:to="linkRange == 'img' ? v[hrefKey] : false"
 							:style="{ width: imgWidth_c + 'px', height: v._height ? v._height + 'px' : false }">
-							<img :src="v[srcKey]">
+							
+								<img v-if="!drawImgCanvas" :src="v[srcKey]">
+								<div v-else class="drawPanel"></div>
+							
 						</component>
 						<slot :index="i" :value="v"></slot>
 					</component>
@@ -219,6 +247,10 @@
 			alink
 		},
 		props: {
+			drawImgCanvas: { // 外部重绘图片，而不是直接使用img标签 
+				type: Boolean,
+				default: false
+			},
 			width: { // 容器宽度
 				type: Number
 			},
@@ -318,9 +350,7 @@
 		mounted() {
 			this.bindClickEvent()
 			this.loadingMiddle()
-
-			this.preload()
-			this.cols = this.calcuCols()
+			
 			this.$on('preloaded', () => {
 				this.isFirstLoad = false
 
@@ -329,10 +359,26 @@
 					this.isPreloading = false
 					this.imgBoxEls = this.$el.getElementsByClassName('img-box')
 					// console.log('图片总数', this.imgBoxEls.length)
+					let drawPanels = this.$el.getElementsByClassName('drawPanel')
+					for(let i = 0; i < drawPanels.length; i++) {
+						if(this.imgsArr_c[i].hasOwnProperty('drawImgCanvas')) {
+							let element = this.imgsArr_c[i].drawImgCanvas;
+							element.classList.add("img-canvas-style");
+							element.style.display = 'block';
+							element.style['max-width'] = '100%';
+							element.style.width = 'auto';
+							element.style.height = 'auto';
+							drawPanels[i].appendChild(element);
+						}
+						
+					}
 					this.waterfall()
 				})
 
 			})
+			this.preload()
+			this.cols = this.calcuCols()
+			
 			if (!this.isMobile && !this.width) window.addEventListener('resize', this.response)
 			if (this.isMobile && this.enablePullDownEvent) this.pullDown()
 			this.scroll()
@@ -363,6 +409,10 @@
 		methods: {
 			// ==1== 预加载
 			preload(src, imgIndex) {
+				if(this.imgsArr.length == 0){
+					this.$emit('preloaded')
+					return
+				}
 				this.imgsArr.forEach((imgItem, imgIndex) => {
 					if (imgIndex < this.loadedCount) return // 只对新加载图片进行预加载
 					// 无图时
@@ -383,8 +433,13 @@
 
 						this.loadedCount++
 						// 预加载图片，计算图片容器的高
-						this.imgsArr[imgIndex]._height = e.type == 'load' ? Math.round(this.imgWidth_c / (oImg
-							.width / oImg.height)) : (this.isMobile ? this.imgWidth_c : this.imgWidth)
+						if(e.type == 'load'){
+							this.imgsArr[imgIndex]._height = Math.round(this.imgWidth_c / (oImg.width / oImg.height))
+							this.$emit('imgLoaded', imgIndex, oImg);
+							
+						} else {
+							this.imgsArr[imgIndex]._height = this.isMobile ? this.imgWidth_c : this.imgWidth
+						}
 						if (e.type == 'error') {
 							this.imgsArr[imgIndex]._error = true
 							this.$emit('imgError', this.imgsArr[imgIndex])
@@ -408,7 +463,7 @@
 			},
 			// ==3== waterfall布局
 			waterfall() {
-				if (!this.imgBoxEls) return
+				if (!this.imgBoxEls || this.imgBoxEls.length == 0) return
 				// console.log('waterfall')
 				var top, left, height, colWidth = this.isMobile ? this.imgBoxEls[0].offsetWidth : this.colWidth
 				if (this.beginIndex == 0) this.colsHeightArr = []
