@@ -114,10 +114,15 @@ class AliyunPanManager {
     async fetch_open_file_list({parent_file_id, next_marker, limit = 200, order_direction = 'ASC'}) {
         const uri = '/adrive/v1.0/openFile/list';
         const method = 'POST';
+        // created_at
+        // updated_at
+        // name
+        // size
         const data = {
             "drive_id": this.drive_id,
             "limit": limit,
             "parent_file_id": parent_file_id,
+            "order_by": "name",
             "order_direction": order_direction
         };
         if (next_marker) {

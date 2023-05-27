@@ -413,6 +413,7 @@
 					this.$emit('preloaded')
 					return
 				}
+				this.isPreloading = true
 				this.imgsArr.forEach((imgItem, imgIndex) => {
 					if (imgIndex < this.loadedCount) return // 只对新加载图片进行预加载
 					// 无图时
@@ -508,7 +509,6 @@
 				if (this.isPreloading) return
 				var minHeight = Math.min.apply(null, this.colsHeightArr)
 				if (scrollEl.scrollTop + scrollEl.offsetHeight > minHeight - this.reachBottomDistance) {
-					this.isPreloading = true
 					this.$emit('scrollReachBottom') // 滚动触底
 				}
 			},

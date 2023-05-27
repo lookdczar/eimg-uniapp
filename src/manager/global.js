@@ -12,7 +12,7 @@ const global = {
     eimgPassword: '', // 加密图片密钥
   },
 	num: {
-    imgPerPage: 10, // 图片视图每页显示数量
+    imgPerPage: 3, // 图片视图每页显示数量
   },
   key: {
     eimgSubfix: 'eimg', // 加密图片后缀

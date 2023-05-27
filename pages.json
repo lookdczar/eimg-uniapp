@@ -5,24 +5,28 @@
 			"path": "pages/file-browser/file-browser",
 			"style": {
 				"navigationBarTitleText": "文件浏览",
+				"enablePullDownRefresh": false,
 				"app-plus": { //App端扩展配置
+					"pullToRefresh": {
+						"support": false
+					},
 					"titleNView": { //原生导航栏配置参数
 						"buttons": [{
-							"text": "返回",
-							"float": "left",
-							"fontSize": "22px"
-							
-						},
-						{
-							"text": "模式",
-							"float": "right",
-							"fontSize": "22px",
-							"select" : true
-						}]
-						
+								"text": "返回",
+								"float": "left",
+								"fontSize": "22px"
+
+							},
+							{
+								"text": "模式",
+								"float": "right",
+								"fontSize": "22px",
+								"select": true
+							}
+						]
+
 					}
-				},
-				"enablePullDownRefresh": true
+				}
 			}
 
 		},

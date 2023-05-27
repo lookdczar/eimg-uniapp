@@ -1,4 +1,5 @@
 
+import emitter from '@/uni_modules/uview-ui/libs/util/emitter';
 import md5 from 'js-md5';
 
 const imageCache = new Map();
@@ -40,23 +41,23 @@ const ImageManager = {
 
 	return image_url;
 	},
-	onImageLoaded(e, aid, pid) {
+	onImageLoaded(e, width, height, aid, pid, c, c2d, url) {
 		var t
-		t = document.createElement('canvas')
+		t = c? c : document.createElement('canvas')
 		// null == e.nextElementSibling
 		// 	? ((t = document.createElement('canvas')), e.after(t))
 		// 	: (t = document.getElementById(e.id).nextElementSibling)
-		t.classList.add('img-canvas-style');
+		// t.classList.add('img-canvas-style');
 
-		var a = t.getContext('2d'),
-			n = e.width,
+		var a = c2d? c2d: t.getContext('2d'),
+			n = width? width: e.width,
 			d = e.naturalWidth,
-			i = e.naturalHeight
-			; (t.width = d),
-				(t.height = i),
-				// (n > e.parentNode.offsetWidth || 0 == n) && (n = e.parentNode.offsetWidth),
-				(t.style.width = n + 'px'),
-				(t.style.display = 'block')
+			i = e.naturalHeight; 
+			(t.width = d),
+			(t.height = i),
+			// (n > e.parentNode.offsetWidth || 0 == n) && (n = e.parentNode.offsetWidth),
+			(t.style.width = n + 'px'),
+			(t.style.display = 'block')
 
 		var o = pid
 		var s = this.get_num(window.btoa(aid), window.btoa(o))
@@ -70,7 +71,8 @@ const ImageManager = {
 			var c = Math.floor(i / s),
 				g = c * m,
 				w = i - c * (m + 1) - l
-			0 == m ? (c += l) : (g += l), a.drawImage(e, 0, w, r, c, 0, g, r, c)
+			0 == m ? (c += l) : (g += l)
+			a.drawImage(url? url:e, 0, w, r, c, 0, g, r, c)
 		}
 		return t
 	},

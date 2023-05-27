@@ -4,23 +4,34 @@
 		:columns="uiViewModePickerList" 
 		@confirm="onViewModePickerChange" 
 		@cancel="showViewModePicker=false" 
-		:defaultIndex="[viewModePickerIndex]"></u-picker>
-		<view v-if="viewModePickerIndex==FileViewMode.list">
-		<uni-list>
+		:defaultIndex="[uiFileViewMode]"></u-picker>
+		<view v-if="uiFileViewMode==FileViewMode.list">
+		<uni-list ref="uiListView" @scrolltolower="fileListReachBottom" :lowerThreshold="100">
 			<uni-list-item v-for="(item, index) in curFile.children" :key="index" :title="item.name" clickable
 				@click="onFileRowClick($event, index)" :link="item.type == 'folder' ? 'reLaunch' : null">
 			</uni-list-item>
 			<uni-list-item v-if="loadingData" key="loadingData">
 				<template v-slot:body>
 					<u-loading-icon text="加载中" textSize="18"></u-loading-icon>
-				</template>
+				</template> 
 			</uni-list-item>
 		</uni-list>
 		</view>
-		
-		<view v-if="viewModePickerIndex==FileViewMode.img" class="" :style="'height:' + uiContentHeight">
-			<vue-waterfall-easy :drawImgCanvas="true" @click="onImgViewClick" :imgsArr="imgViewData" @scrollReachBottom="getImgViewData" @imgLoaded="onImgLoaded"></vue-waterfall-easy>
+
+		<view v-if="uiFileViewMode==FileViewMode.img">
+		<scroll-view ref="uiImgView">
+			<view v-for="(item, index) in imgViewData" :key="index" class="pb-1 center-block" :style="'max-width: 95%;width:auto;height:auto;'" :desc="item.name">
+				<img :class="{'hidden':item.loaded}" :ref="'imgView-img-'+index" :src="item.src" @load="onImgLoaded($event, index)" :style="'width:100%;height:100%;'">
+				<!-- <canvas :ref="'imgView-unicanvas-'+index"  :canvas-id="'imgView-canvas-'+index"></canvas> -->
+			</view>
+			<view v-if="loadingData" class="w-100 h-10p">
+					<u-loading-icon class="center-block" text="加载中" textSize="18"></u-loading-icon>
+					<view class="h-10p"></view>
+			</view>
+		</scroll-view>
 		</view>
+		
+		
 		
 	</view>
 </template>
@@ -30,6 +41,7 @@
 	import global from '@/src/manager/global.js'
 	import ImageManager from '@/src/manager/ImageManager.js'
 	var FileViewMode = {
+		desc: ['列表', '图片'],
 		list:0,
 		img: 1
 	}
@@ -58,24 +70,28 @@
 		async created() {
 
 			if (!cache.curFile.children || cache.curFile.children.length == 0) {
-				await this.loadMore()
+				await this.loadMoreFileData()
 			}
 		},
 		onNavigationBarButtonTap(btn) {
 			if (btn.text == '返回') {
-				if(this.viewModePickerIndex == FileViewMode.img){
-					this.viewModePickerIndex = FileViewMode.list;
-					this.imgViewData = [];
-				}
+
 				if (cache.curFile.parent) {
 					this.$nextTick(() => {
-						console.log('this.viewModePickerIndex: ' + this.viewModePickerIndex)
-						cache.curFile = cache.curFile.parent;
-						this.curFile = cache.curFile;
+						console.log('this.uiFileViewMode: ' + this.uiFileViewMode)
+						if(this.uiFileViewMode == FileViewMode.img){
+							this.setViewMode(FileViewMode.list)
+						}
+						this.resetData(cache.curFile.parent)
 					})
 				}
 			} else if (btn.text = '模式') {
-				this.showViewModePicker = true;
+				// this.showViewModePicker = true; 
+				if(this.uiFileViewMode == FileViewMode.list){
+					this.setViewMode(FileViewMode.img)
+				}else {
+					this.setViewMode(FileViewMode.list)
+				}
 			}
 		},
 		computed: {
@@ -89,38 +105,90 @@
 				loadingData: false,
 				showViewModePicker: false, // 是否选择显示模式框
 				uiViewModePickerList: [
-					['列表', '图片']
+					FileViewMode.desc
 				],
-				viewModePickerIndex: 0,
+				uiFileViewMode: 0,
 				FileViewMode: FileViewMode,
 				uiContentHeight: '',
-				imgViewData: [],
+				imgViewData: [
+					// {
+					// 	'src': 'https://img1.baidu.com/it/u=28231220,1635955213&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img0.baidu.com/it/u=4118637287,4106560954&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=1127',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img1.baidu.com/it/u=3844428005,3477953559&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img2.baidu.com/it/u=3334914535,1784551017&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img1.baidu.com/it/u=3844428005,3477953559&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img2.baidu.com/it/u=3334914535,1784551017&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img2.baidu.com/it/u=3334914535,1784551017&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img1.baidu.com/it/u=3844428005,3477953559&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+					// {
+					// 	'src': 'https://img2.baidu.com/it/u=3334914535,1784551017&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500',
+					// 	'href': 'https://www.baidu.com'
+					// },
+				],
 				imgViewPage: 0,
 			}
 		},
 		methods: {
-			onReachBottom() {
+			onReachBottom(){
+				this.fileListReachBottom()
+			},
+			async fileListReachBottom() {
 				// 页面触底时执行
 				console.log("下拉到底");
-				this.loadMore(true);
+				await this.loadMoreData(true);
 			},
-			async onFileRowClick(e, index) {
+			
+			async onFileRowClick(e, index) { // 点击文件列表的行
 				console.log('click: ' + index)
 				let file = cache.curFile.children[index];
 				if (file.type == 'file') {
 					return;
 				}
-				cache.curFile = file;
-				this.curFile = cache.curFile;
+				this.resetData(file);
 				if (!cache.curFile.children || cache.curFile.children.length == 0) {
-					await this.loadMore(false)
+					await this.loadMoreFileData(false)
 				}
 			},
-			async loadMore(nextPage = false) {
+			async loadMoreData(nextPage = false){
+				this.loadingData = true;
+				if(this.uiFileViewMode == FileViewMode.list){
+					await this.loadMoreFileData(nextPage);
+				}else if(this.uiFileViewMode == FileViewMode.img){
+					let res = await this.loadMoreImgData();
+					if(!res){
+						await this.loadMoreFileData(true);
+						await this.loadMoreImgData();
+					}
+				}
+				this.loadingData = false;
+			},
+			async loadMoreFileData(nextPage = false) {
 				if (nextPage && !cache.curFile.next_marker) {
 					return;
 				}
-				this.loadingData = true;
 				let response;
 				try {
 					response = await cache.alypManager.fetch_open_file_list({
@@ -138,58 +206,94 @@
 				cache.curFile.next_marker = response.next_marker
 				cache.curFile.addChildrenfromDictList(response.items, global.key.eimgSubfix)
 
-				this.loadingData = false;
 			},
-			onViewModePickerChange(e) {
-				this.showViewModePicker = false;
-				console.log('onViewModePickerChange:');
-				console.log(e)
-				this.viewModePickerIndex = e.indexs[0];
-				console.log(this.viewModePickerIndex)
-				document.getElementsByClassName('uni-btn-icon')[2].innerText = e.value[0];
-				if(this.viewModePickerIndex == FileViewMode.img && this.imgViewData.length == 0){
-					this.getImgViewData();
-				}
-				
-			},
-			setViewMode(mode) {
-				this.viewModePickerIndex = mode;
-				this.$refs.viewModePicker.setIndexs([this.viewModePickerIndex]);
-			},
-			async getImgViewData(){
-				console.log('getImgViewData')
+			async loadMoreImgData(){
+				console.log('loadMoreImgData')
 				let eimgList = this.curFile.getFilterTypeChildren(global.key.eimgSubfix);
-				for(let i = this.imgViewPage * global.num.imgPerPage; i < (this.imgViewPage + 1) * global.num.imgPerPage; i++){
-					if(i >= eimgList.length){
-						break;
-					}
+				if(this.imgViewData.length == eimgList.length) {
+					return false
+				}
+				let max = Math.min((this.imgViewPage + 1) * global.num.imgPerPage, eimgList.length)
+				for(let i = this.imgViewPage * global.num.imgPerPage; i < max; i++){
 					let eimgFile = eimgList[i];
 					if(!eimgFile.url) {
 						console.error('eimgFile.url is null, fileName: ' + eimgFile.name);
 						this.imgViewData.push({
-							'src': ''
+							'src': '',
+							'name': eimgFile.name,
+							'loaded': false,
 						})
 					}
 					else {
 						let blobUrl = await ImageManager.xor_decrypt(eimgFile.name, eimgFile.url, global.setting.eimgPassword);
 						this.imgViewData.push({
-							'src': blobUrl
+							'src': blobUrl,
+							'name': eimgFile.name,
+							'loaded': false,
 						})
 					}
 				}
+				this.imgViewPage++;
+				return true
 			},
-			onImgLoaded(index, img){
-				let eimgList = this.curFile.getFilterTypeChildren(global.key.eimgSubfix);
-				let eimgFile = eimgList[index];
-				let fileName = eimgFile.name;
+			onViewModePickerChange(e) {
+				this.showViewModePicker = false;
+				console.log('onViewModePickerChange');
+				this.setViewMode(e.indexs[0]);	
+			},
+			setViewMode(mode) { // 设置浏览模式
+				this.uiFileViewMode = mode;
+				document.getElementsByClassName('uni-btn-icon')[2].innerText = FileViewMode.desc[mode];
+				this.$refs.viewModePicker.setIndexs([this.uiFileViewMode]);
+				if(mode == FileViewMode.list){
+					
+				}
+				else if(mode == FileViewMode.img){
+					// 加载图片数据
+					if(this.uiFileViewMode == FileViewMode.img && this.imgViewData.length == 0){
+						this.loadMoreImgData();
+					}
+				}
+			},
+			onImgLoaded(e, index){
+				let data = this.imgViewData[index];
+				let url = data.src;
+				let img = (this.$refs['imgView-img-'+index])[0];
+				let canvas = document.createElement('canvas');
+				img.after(canvas)
+				// let canvasContext = uni.createCanvasContext('imgView-canvas-'+index)
+				// let c = img.nextElementSibling.getElementsByTagName("canvas")[0]
+				// let unicanvas = this.$refs['imgView-unicanvas-'+index][0]
+
+				// return
+				// let eimgList = this.curFile.getFilterTypeChildren(global.key.eimgSubfix);
+				// let eimgFile = eimgList[index];
+				let width = img.width;
+				let height = img.height;
+				if(data.loaded) {
+					width = data.width;
+					height = data.height;
+				} else {
+					data.width = width;
+					data.height = height;
+				}
+				let fileName = data.name;
 				let aid_pid = fileName.split('.')[0];
 				let aid = parseInt(aid_pid.split('_')[0]);
 				let pid = aid_pid.split('_')[1];
-				let canvasE = ImageManager.onImageLoaded(img, aid, pid);
-				this.imgViewData[index].drawImgCanvas = canvasE;
+				let canvasE = ImageManager.onImageLoaded(img, width, height, aid, pid, canvas);
+				data.loaded = true;
 			},
 			onImgViewClick(){
 				
+			},
+			resetData(currentViewFile){
+				if(currentViewFile){
+					cache.curFile = currentViewFile;
+					this.curFile = cache.curFile;
+				}
+				this.imgViewData = [];
+				this.imgViewPage = 0;
 			}
 
 		}
@@ -200,5 +304,8 @@
 .fullScreen {
     height: 100vh;
     /* 其他样式 */
+  }
+  .hidden {
+	display: none !important;
   }
 </style>

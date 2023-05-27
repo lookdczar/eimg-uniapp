@@ -129,6 +129,7 @@
 			},
 			// 滚动到底部触发事件
 			scrolltolower(e) {
+				console.log('scrolltolower') 
 				uni.$u.sleep(30).then(() => {
 					this.$emit('scrolltolower')
 				})

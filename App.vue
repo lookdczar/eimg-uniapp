@@ -20,4 +20,5 @@
 	/*每个页面公共css */
 	@import "components/colorui/main.css";
 	@import "components/colorui/icon.css";
+	@import "components/common/common.css";
 </style>

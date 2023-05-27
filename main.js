@@ -18,7 +18,6 @@ const app = new Vue({
   ...App
 })
 console.log('after app')
-import * as global from '@/src/manager/global.js'
 
 import YPFileModel from '@/src/model/YPFileModel.js'
 store.state.g_curFile = new YPFileModel({file_id: 'testid'})
