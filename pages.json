@@ -14,14 +14,26 @@
 						"buttons": [{
 								"text": "返回",
 								"float": "left",
-								"fontSize": "22px"
+								"fontSize": "20px"
 
 							},
 							{
 								"text": "模式",
 								"float": "right",
-								"fontSize": "22px",
-								"select": true
+								"fontSize": "20px",
+								"select": false
+							},
+							{
+								"text": "全屏",
+								"float": "right",
+								"fontSize": "20px",
+								"select": false
+							},
+							{
+								"text": "重绘",
+								"float": "right",
+								"fontSize": "20px",
+								"select": false
 							}
 						]
 

@@ -20,6 +20,7 @@ class YPFileModel {
 		this.file_id = file_id
 		this.parent_file_id = parent_file_id
 		this.name = name
+		this.sourceName = name
 		this.url = url ? url : ''
 		this.size = size
 		this.file_extension = file_extension
@@ -47,8 +48,9 @@ class YPFileModel {
 	 * 
 	 * @param {Array} children [{file_id, parent_file_id, name, size, file_extension, content_hash, type, created_at, updated_at}]
 	 * @param {string} filterType 将指定文件后缀类型筛选出来，供后续使用
+	 * @param {function(YPFileModel)} processCallback 对每个子文件进行处理
 	 */
-	addChildrenfromDictList(children, filterType){
+	addChildrenfromDictList(children, filterType, processCallback){
 		if(filterType && !this.filterTypeChildren.hasOwnProperty(filterType)){
 			this.filterTypeChildren[filterType] = []
 		}
@@ -59,6 +61,9 @@ class YPFileModel {
 					...child,
 					parent: this
 				});
+				if(processCallback){
+					processCallback(cModel)
+				}
 				this.children.push(cModel)
 				if(filterType && cModel.name.endsWith(filterType)){
 					this.filterTypeChildren[filterType].push(cModel)

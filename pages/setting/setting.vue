@@ -11,6 +11,11 @@
 				<u-form-item label="imgPassword" prop="" borderBottom ref="imgPassword">
 					<u--input v-model="global.setting.eimgPassword" border="none"></u--input>
 				</u-form-item>
+			</u-form-item>
+				<u-form-item label="图片加载张数" prop="" borderBottom ref="imgPerPage">
+					<u--input v-model="global.num.imgPerPage" border="none"></u--input>
+				</u-form-item>
+				
 			</u--form>
 			<u-button type="primary" text="保存" customStyle="margin-top: 50px" @click="submit"></u-button>
 		</view>

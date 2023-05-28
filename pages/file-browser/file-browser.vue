@@ -12,21 +12,20 @@
 			</uni-list-item>
 			<uni-list-item v-if="loadingData" key="loadingData">
 				<template v-slot:body>
-					<u-loading-icon text="加载中" textSize="18"></u-loading-icon>
+					<uni-load-more class="center-block" :status="loadingData?'loading':'no-more'"></uni-load-more>
 				</template> 
 			</uni-list-item>
 		</uni-list>
 		</view>
 
 		<view v-if="uiFileViewMode==FileViewMode.img">
-		<scroll-view ref="uiImgView">
+		<scroll-view ref="uiImgView" >
 			<view v-for="(item, index) in imgViewData" :key="index" class="pb-1 center-block" :style="'max-width: 95%;width:auto;height:auto;'" :desc="item.name">
 				<img :class="{'hidden':item.loaded}" :ref="'imgView-img-'+index" :src="item.src" @load="onImgLoaded($event, index)" :style="'width:100%;height:100%;'">
 				<!-- <canvas :ref="'imgView-unicanvas-'+index"  :canvas-id="'imgView-canvas-'+index"></canvas> -->
 			</view>
-			<view v-if="loadingData" class="w-100 h-10p">
-					<u-loading-icon class="center-block" text="加载中" textSize="18"></u-loading-icon>
-					<view class="h-10p"></view>
+			<view >
+				<uni-load-more class="center-block" :status="loadingData?'loading':'no-more'"></uni-load-more>
 			</view>
 		</scroll-view>
 		</view>
@@ -40,6 +39,7 @@
 	import cache from '@/src/manager/cache.js'
 	import global from '@/src/manager/global.js'
 	import ImageManager from '@/src/manager/ImageManager.js'
+	import Util from '@/src/manager/Util.js'
 	var FileViewMode = {
 		desc: ['列表', '图片'],
 		list:0,
@@ -70,7 +70,7 @@
 		async created() {
 
 			if (!cache.curFile.children || cache.curFile.children.length == 0) {
-				await this.loadMoreFileData()
+				await this.loadMoreData()
 			}
 		},
 		onNavigationBarButtonTap(btn) {
@@ -85,13 +85,23 @@
 						this.resetData(cache.curFile.parent)
 					})
 				}
-			} else if (btn.text = '模式') {
+			} else if (btn.text == '模式') {
 				// this.showViewModePicker = true; 
 				if(this.uiFileViewMode == FileViewMode.list){
 					this.setViewMode(FileViewMode.img)
 				}else {
 					this.setViewMode(FileViewMode.list)
 				}
+			} else if (btn.text == '全屏') {
+				if(cache.showTabBar){
+					uni.hideTabBar()
+				}else {
+					uni.showTabBar()
+				}
+				cache.showTabBar = !cache.showTabBar
+			}
+			else if (btn.text == '重绘') {
+				this.uiImgReDraw = !this.uiImgReDraw
 			}
 		},
 		computed: {
@@ -149,6 +159,7 @@
 					// },
 				],
 				imgViewPage: 0,
+				uiImgReDraw: false, // 是否重绘图片
 			}
 		},
 		methods: {
@@ -169,7 +180,7 @@
 				}
 				this.resetData(file);
 				if (!cache.curFile.children || cache.curFile.children.length == 0) {
-					await this.loadMoreFileData(false)
+					await this.loadMoreData(false)
 				}
 			},
 			async loadMoreData(nextPage = false){
@@ -204,7 +215,16 @@
 				}
 				
 				cache.curFile.next_marker = response.next_marker
-				cache.curFile.addChildrenfromDictList(response.items, global.key.eimgSubfix)
+				cache.curFile.addChildrenfromDictList(response.items, global.key.eimgSubfix, function(fileModel) {
+					if(fileModel.type == 'folder' && fileModel.name.startsWith(global.key.eimgSubfix+'_')) {
+						// 将fileModel.name用_分割
+						let nameArr = fileModel.name.split('_');
+						// 将nameArr第2位到最后一位用_合并为字符串
+						let base64name = nameArr.slice(2).join('_');
+						let realName = Util.xorDecrypt(base64name, global.setting.eimgPassword)
+						fileModel.name = realName
+					}
+				})
 
 			},
 			async loadMoreImgData(){
@@ -251,11 +271,14 @@
 				else if(mode == FileViewMode.img){
 					// 加载图片数据
 					if(this.uiFileViewMode == FileViewMode.img && this.imgViewData.length == 0){
-						this.loadMoreImgData();
+						this.loadMoreData();
 					}
 				}
 			},
 			onImgLoaded(e, index){
+				if(!this.uiImgReDraw){
+					return
+				}
 				let data = this.imgViewData[index];
 				let url = data.src;
 				let img = (this.$refs['imgView-img-'+index])[0];

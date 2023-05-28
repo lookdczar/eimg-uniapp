@@ -21,7 +21,8 @@ const cache = {
 
 			}
 		}
-	)
+	),
+	showTabBar: true
 }
 
 
