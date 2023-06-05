@@ -42,6 +42,7 @@ import global from '@/src/manager/global.js'
 		},
 		methods: {
 			submit() {
+				global.num.imgPerPage = parseInt(global.num.imgPerPage, 10)
 				console.log(global)
 				global.save()
 			}

@@ -178,10 +178,22 @@
 				if (file.type == 'file') {
 					return;
 				}
-				this.resetData(file);
-				if (!cache.curFile.children || cache.curFile.children.length == 0) {
-					await this.loadMoreData(false)
+				
+				// 跳转图片页
+				if(file.sourceName.startsWith(global.key.eimgSubfix+'_')){
+					uni.navigateTo({
+						url: '/pages/img-view/img-view?index=' + index
+					});
 				}
+				else {
+					this.resetData(file);
+					if (!cache.curFile.children || cache.curFile.children.length == 0) {
+						await this.loadMoreData(false)
+					}
+				}
+				
+				
+				
 			},
 			async loadMoreData(nextPage = false){
 				this.loadingData = true;
@@ -212,6 +224,7 @@
 						title: '文件请求异常: ' + error,
 						icon: 'error'
 					});
+					return;
 				}
 				
 				cache.curFile.next_marker = response.next_marker

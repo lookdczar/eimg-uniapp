@@ -64,6 +64,27 @@
 
 		}
 
+		, {
+			"path": "pages/img-view/img-view",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false,
+				"app-plus": { //App端扩展配置
+					"pullToRefresh": {
+						"support": false
+					},
+					"titleNView": { //原生导航栏配置参数
+						"buttons": [{
+							"text": "返回",
+							"float": "left",
+							"fontSize": "20px"
+
+						}]
+					}
+				}
+			}
+
+		}
 	],
 	"tabBar": {
 		"list": [{
